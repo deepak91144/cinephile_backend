@@ -21,7 +21,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('/api', apiRouter);
 
 // MongoDB Connection
-mongoose.connect('mongodb://localhost:27017/cinema-social')
+mongoose.connect('mongodb+srv://stiphen:xnFN3RQLaqeTOcWn@cluster0.napphvz.mongodb.net/')
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
 
