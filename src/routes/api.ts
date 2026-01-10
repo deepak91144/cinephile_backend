@@ -71,6 +71,11 @@ router.post('/seed', async (req, res) => {
   }
 });
 
+router.get('/seed', async (req, res) => {
+      res.status(500).json({ message: "Database seeded successfully"   });
+
+});
+
 // --- Posts ---
 router.get('/posts', async (req, res) => {
   try {
