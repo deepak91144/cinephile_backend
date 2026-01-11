@@ -25,6 +25,7 @@ export interface IMovie extends Document {
   posterUrl: string;
   rating: number;
   director?: string;
+  type?: 'movie' | 'person';
 }
 
 export interface IPost extends Document {
@@ -64,8 +65,6 @@ export interface IMessage extends Document {
   createdAt: Date;
 }
 
-// --- Schemas ---
-
 const UserSchema = new Schema({
   username: { type: String, required: true, unique: true },
   name: { type: String, required: true },
@@ -90,6 +89,7 @@ const MovieSchema = new Schema({
   posterUrl: { type: String, required: true },
   rating: { type: Number, required: true },
   director: { type: String },
+  type: { type: String, enum: ['movie', 'person'], default: 'movie' },
 });
 
 const PostSchema = new Schema({

@@ -75,6 +75,57 @@ router.get('/seed', async (req, res) => {
       res.status(500).json({ message: "Database seeded successfully"   });
 
 });
+// --- Movies ---
+import { searchCinemaEntities } from '../lib/llm';
+
+router.get('/movies', async (req, res) => {
+  try {
+    const { q } = req.query;
+    
+    // If no query, return recent movies (or random selection)
+    if (!q) {
+        const movies = await Movie.find().limit(20).sort({ year: -1 });
+        return res.json(movies);
+    }
+
+    const query = q as string;
+
+    // 1. Search DB
+    const dbMovies = await Movie.find({
+        $or: [
+            { title: { $regex: query, $options: 'i' } },
+            { director: { $regex: query, $options: 'i' } }
+        ]
+    }).limit(10);
+
+    // If we have enough DB results, return them (optimization)
+    // But user asked to search LLM if "dont exist". Let's say if we have < 3 results or just 0.
+    if (dbMovies.length > 0) {
+        return res.json(dbMovies);
+    }
+
+    // 2. Search LLM
+    const llmResults = await searchCinemaEntities(query);
+
+    // 3. Save to DB and merge
+    const savedMovies = [];
+    for (const item of llmResults) {
+        // Upsert based on tmdbId
+        const existing = await Movie.findOne({ tmdbId: item.tmdbId });
+        if (existing) {
+            savedMovies.push(existing);
+        } else {
+            const newMovie = await Movie.create(item);
+            savedMovies.push(newMovie);
+        }
+    }
+
+    res.json(savedMovies);
+
+  } catch (error) {
+    res.status(500).json({ error: (error as Error).message });
+  }
+});
 
 // --- Posts ---
 router.get('/posts', async (req, res) => {
